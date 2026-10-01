@@ -47,7 +47,7 @@ export default async function DeadLettersPage() {
                 <td>{job.lastError}</td>
                 <td>
                   <form action={`/api/jobs/${job.id}/retry`} method="POST">
-                    <button type="submit">Retry</button>
+                    <button type="submit">Retry</buton>
                   </form>
                 </td>
               </tr>

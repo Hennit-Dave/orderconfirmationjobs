@@ -25,7 +25,7 @@ let inFlight = 0;
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
+  port: Number(process.env.SMTPPORT),
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
@@ -147,7 +147,7 @@ async function processJob(job: Job): Promise<void> {
 // each lane holds at most one job at a time, and claimJob's SKIP LOCKED
 // means concurrent lanes never race each other for the same row.
 async function workerLane(): Promise<void> {
-  for (;;) {
+  for (; ;) {
     const job = await claimJob();
 
     if (!job) {

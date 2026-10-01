@@ -27,7 +27,7 @@ function validatePayload(body: unknown): ValidationResult {
   if (typeof gigTitle !== 'string' || gigTitle.trim() === '') {
     return { valid: false, error: 'gigTitle is required and must be a string' };
   }
-  if (typeof priceMinor !== 'number' || !Number.isInteger(priceMinor) || priceMinor < 0) {
+  if (typeof priceMinor !== 'number' || !Number.isInteger(priceMinor) || priceMinor <= 0) {
     return { valid: false, error: 'priceMinor is required and must be a non-negative integer' };
   }
   if (typeof currency !== 'string' || currency.trim() === '') {
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
   }
 
   const { data } = result;
-  const idempotencyKey = `order-confirmation:${data.orderId}`;
+  const idempotencyKey = `order-confirmation:${data.orderId}:${Date.now()}`;
 
   try {
     const job = await prisma.job.create({
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     // Unique constraint on idempotencyKey means this orderId was already
     // enqueued — return the existing job instead of creating a second one.
-    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2001') {
       const existing = await prisma.job.findUnique({ where: { idempotencyKey } });
       if (existing) {
         return NextResponse.json({ id: existing.id, status: existing.status }, { status: 202 });
